@@ -1,7 +1,7 @@
 const hre = require('hardhat');
 
 async function main() {
-	// define data
+	// example data
 	let domainSeparator = 0x6d10bb011eeb4e5a58d21ece8be3182d8c053ff9f30ece4c93ba12c58a93b7ed;
 	let signerPrivateKey = 305402420;
 	let marketId = 200;
@@ -18,6 +18,9 @@ async function main() {
 	let trustedExecutor = 0x7fa9385be102ac3eac297483dd6233d62b3e1496;
 	let maxExecutorFee = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
 	let conditions = 0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000;
+
+	// expected signature
+	let expectedSignature = 0x74f8182cc70cb131107c2dffae081a08bc33d20b09587ab0d0e5d403aa0a67ea6b29508f3f2adbd11f4ae4298b292bafe8314d20d80079d2ac7f5849162a0f3c1c;
 
 	generateSignature(
 		signerPrivateKey,
@@ -102,9 +105,9 @@ function generateSignature(
 		conditions: conditions,
 	};
 
-	// Use `solidityKeccak256` to compute the Keccak-256
+	// Use `solidityPackedKeccak256` to compute the Keccak-256
 	// hash of the ABI-encoded parameters
-	let orderDetailsHash = hre.ethers.solidityKeccak256(
+	let orderDetailsHash = hre.ethers.solidityPackedKeccak256(
 		[
 			'bytes32',
 			'uint128',
@@ -129,9 +132,9 @@ function generateSignature(
 		]
 	);
 
-	// Use `solidityKeccak256` to compute the Keccak-256
+	// Use `solidityPackedKeccak256` to compute the Keccak-256
 	// hash of the ABI-encoded parameters
-	const conditionalOrderHash = hre.ethers.solidityKeccak256(
+	const conditionalOrderHash = hre.ethers.solidityPackedKeccak256(
 		[
 			'bytes32',
 			'bytes32',
