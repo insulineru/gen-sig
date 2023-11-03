@@ -2,17 +2,47 @@ const hre = require('hardhat');
 
 async function main() {
 	// define data
-	let data;
+	let domainSeparator = 0x6d10bb011eeb4e5a58d21ece8be3182d8c053ff9f30ece4c93ba12c58a93b7ed;
+	let signerPrivateKey = 305402420;
+	let marketId = 200;
+	let accountId = 170141183460469231731687303715884105756;
+	let sizeDelta = 1000000000000000000;
+	let settlementStrategyId = 0;
+	let acceptablePrice = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
+	let isReduceOnly = false;
+	let trackingCode = 0x4b57454e54410000000000000000000000000000000000000000000000000000;
+	let referrer = 0xf510a2ff7e9dd7e18629137ada4eb56b9c13e885;
+	let signer = 0xa229781d40864011729c753eac24a772890ff527;
+	let nonce = 0;
+	let requireVerified = false;
+	let trustedExecutor = 0x7fa9385be102ac3eac297483dd6233d62b3e1496;
+	let maxExecutorFee = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
+	let conditions = 0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000;
 
-	if (data != null) {
-		generateSignature(data)
-			.then((signature) => {
-				console.log('Signature:', signature);
-			})
-			.catch((error) => {
-				console.error('Error signing message:', error);
-			});
-	}
+	generateSignature(
+		signerPrivateKey,
+		domainSeparator,
+		marketId,
+		accountId,
+		sizeDelta,
+		settlementStrategyId,
+		acceptablePrice,
+		isReduceOnly,
+		trackingCode,
+		referrer,
+		signer,
+		nonce,
+		requireVerified,
+		trustedExecutor,
+		maxExecutorFee,
+		conditions
+	)
+		.then((signature) => {
+			console.log('Signature:', signature);
+		})
+		.catch((error) => {
+			console.error('Error signing message:', error);
+		});
 }
 
 function generateSignature(
