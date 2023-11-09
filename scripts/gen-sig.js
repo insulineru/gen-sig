@@ -1,26 +1,25 @@
-const hre = require('hardhat');
+const ethers = require('ethers');
 
 async function main() {
 	// example data
-	let domainSeparator = 0x6d10bb011eeb4e5a58d21ece8be3182d8c053ff9f30ece4c93ba12c58a93b7ed;
-	let signerPrivateKey = 305402420;
-	let marketId = 200;
-	let accountId = 170141183460469231731687303715884105756;
-	let sizeDelta = 1000000000000000000;
-	let settlementStrategyId = 0;
-	let acceptablePrice = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
+	let domainSeparator = '0x7f9f752009a0fba436a94f6b7c2421e7b480fc4aca9ab399f5cae3a654dd2403';
+	let signerPrivateKey = 'INSERT_PRIVATE_KEY';
+	let marketId = '100';
+	let accountId = '170141183460469231731687303715884105902';
+	let sizeDelta = '20000000000000000000';
+	let settlementStrategyId = '1';
+	let acceptablePrice = '200000000000000000000';
 	let isReduceOnly = false;
-	let trackingCode = 0x4b57454e54410000000000000000000000000000000000000000000000000000;
-	let referrer = 0xf510a2ff7e9dd7e18629137ada4eb56b9c13e885;
-	let signer = 0xa229781d40864011729c753eac24a772890ff527;
-	let nonce = 0;
+	let trackingCode = '0x4b57454e54410000000000000000000000000000000000000000000000000000';
+	let referrer = '0x08e30BFEE9B73c18F9770288DDd13203A4887460';
+	let nonce = '0';
 	let requireVerified = false;
-	let trustedExecutor = 0x7fa9385be102ac3eac297483dd6233d62b3e1496;
-	let maxExecutorFee = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
-	let conditions = 0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000;
+	let trustedExecutor = '0x16c3579101299ed0D9c1734c6294234e64155918';
+	let maxExecutorFee = '0';
+	let conditions = [];
 
 	// expected signature
-	let expectedSignature = 0x74f8182cc70cb131107c2dffae081a08bc33d20b09587ab0d0e5d403aa0a67ea6b29508f3f2adbd11f4ae4298b292bafe8314d20d80079d2ac7f5849162a0f3c1c;
+	let expectedSignature = '0x1d364545001d44de81342f7485c5a08c17df9c01c9895bc9e8324df1b7fb714318d4d2760df6b7b91343a23b9b44007b60632583fda3e49da8ab15c5a9d58c101b';
 
 	generateSignature(
 		signerPrivateKey,
@@ -33,7 +32,6 @@ async function main() {
 		isReduceOnly,
 		trackingCode,
 		referrer,
-		signer,
 		nonce,
 		requireVerified,
 		trustedExecutor,
@@ -48,7 +46,7 @@ async function main() {
 		});
 }
 
-function generateSignature(
+async function generateSignature(
 	pk, // private key
 	domainSeparator, // can get this from the engine contract (i.e. engine.DOMAIN_SEPARATOR())
 	marketId,
@@ -59,25 +57,27 @@ function generateSignature(
 	isReduceOnly,
 	trackingCode,
 	referrer,
-	signer,
 	nonce,
 	requireVerified,
 	trustedExecutor,
 	maxExecutorFee,
 	conditions
 ) {
+
+	const wallet = new ethers.Wallet(pk);
+	const signer = wallet.address;
 	// `keccak256` provides direct hashing function
 	// that doesn't involve ABI encoding
-	let ORDER_DETAILS_TYPEHASH = hre.ethers.keccak256(
-		hre.ethers.toUtf8Bytes(
+	let ORDER_DETAILS_TYPEHASH = ethers.keccak256(
+		ethers.toUtf8Bytes(
 			'OrderDetails(uint128 marketId,uint128 accountId,int128 sizeDelta,uint128 settlementStrategyId,uint256 acceptablePrice,bool isReduceOnly,bytes32 trackingCode,address referrer)'
 		)
 	);
 
 	// `keccak256` provides direct hashing function
 	// that doesn't involve ABI encoding
-	let CONDITIONAL_ORDER_TYPEHASH = hre.ethers.keccak256(
-		hre.ethers.toUtf8Bytes(
+	let CONDITIONAL_ORDER_TYPEHASH = ethers.keccak256(
+		ethers.toUtf8Bytes(
 			'ConditionalOrder(OrderDetails orderDetails,address signer,uint256 nonce,bool requireVerified,address trustedExecutor,uint256 maxExecutorFee,bytes[] conditions)OrderDetails(uint128 marketId,uint128 accountId,int128 sizeDelta,uint128 settlementStrategyId,uint256 acceptablePrice,bool isReduceOnly,bytes32 trackingCode,address referrer)'
 		)
 	);
@@ -107,7 +107,7 @@ function generateSignature(
 
 	// Use `solidityPackedKeccak256` to compute the Keccak-256
 	// hash of the ABI-encoded parameters
-	let orderDetailsHash = hre.ethers.solidityPackedKeccak256(
+	let orderDetailsHash = ethers.solidityPackedKeccak256(
 		[
 			'bytes32',
 			'uint128',
@@ -134,7 +134,7 @@ function generateSignature(
 
 	// Use `solidityPackedKeccak256` to compute the Keccak-256
 	// hash of the ABI-encoded parameters
-	const conditionalOrderHash = hre.ethers.solidityPackedKeccak256(
+	const conditionalOrderHash = ethers.solidityPackedKeccak256(
 		[
 			'bytes32',
 			'bytes32',
@@ -154,7 +154,7 @@ function generateSignature(
 			conditionalOrder.trustedExecutor,
 			conditionalOrder.maxExecutorFee,
 			conditionalOrder.conditions.map((condition) =>
-				ethers.utils.keccak256(condition)
+				ethers.keccak256(condition)
 			),
 		]
 	);
@@ -162,17 +162,16 @@ function generateSignature(
 	// To simulate `abi.encodePacked`, concatenate the encoded elements
 	// For a simple packed encoding, you can just concatenate the strings directly
 	// Since we're dealing with hex strings, ensure they are properly formatted without the '0x' prefix when concatenating
-	let packedData = ethers.utils.solidityPack(
+	let packedData = ethers.solidityPacked(
 		['string', 'bytes32', 'bytes32'],
 		['\x19\x01', domainSeparator, conditionalOrderHash]
 	);
 
 	// Compute the Keccak-256 hash of the packed data
-	const messageHash = ethers.utils.keccak256(packedData);
+	const messageHash = ethers.keccak256(packedData);
 
 	// Sign the hash
-	const wallet = new ethers.Wallet(pk);
-	const signature = wallet.signMessage(ethers.utils.arrayify(messageHash));
+	const signature = await wallet.signMessage(ethers.getBytes(messageHash));
 
 	return signature;
 }
