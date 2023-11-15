@@ -9,7 +9,8 @@
   "author": "jaredborders",
   "license": "ISC",
   "dependencies": {
-    "ethers": "^6.8.1"
+    "ethers": "^6.8.1",
+    "viem": "^1.19.1"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^3.0.0",
