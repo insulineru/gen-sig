@@ -1,6 +1,7 @@
 const ethers = require('ethers');
-const { hashDomain } = require('viem');
-const { privateKeyToAccount } = require('viem/accounts');
+const viem = require('viem');
+const { hashDomain } = viem;
+const { privateKeyToAccount, sign } = require('viem/accounts');
 
 
 async function main() {
@@ -45,6 +46,30 @@ async function main() {
 	)
 		.then((signature) => {
 			console.log('Signature with signingKey:', signature);
+		})
+		.catch((error) => {
+			console.error('Error signing message:', error);
+		});
+
+	generateSignatureViem(
+		signerPrivateKey,
+		domainSeparator,
+		marketId,
+		accountId,
+		sizeDelta,
+		settlementStrategyId,
+		acceptablePrice,
+		isReduceOnly,
+		trackingCode,
+		referrer,
+		nonce,
+		requireVerified,
+		trustedExecutor,
+		maxExecutorFee,
+		conditions
+	)
+		.then((signature) => {
+			console.log('Signature with viem signingKey:', signature);
 		})
 		.catch((error) => {
 			console.error('Error signing message:', error);
@@ -151,10 +176,10 @@ async function generateSignatureViemTypedData(
 		},
 		types: {
 			EIP712Domain: [
-				{ name: 'name', type: 'string'},
-				{ name: 'version', type: 'string'},
-				{ name: 'chainId', type: 'uint256'},
-				{ name: 'verifyingContract', type: 'address'},
+				{ name: 'name', type: 'string' },
+				{ name: 'version', type: 'string' },
+				{ name: 'chainId', type: 'uint256' },
+				{ name: 'verifyingContract', type: 'address' },
 			]
 		}
 	})
@@ -169,25 +194,25 @@ async function generateSignatureViemTypedData(
 			verifyingContract: '0x13eBcd3aD7B4Aa0595Fe57085C62c4f9CaDdB000',
 		},
 		types: {
-				OrderDetails: [
-					{ name: 'marketId', type: 'uint128' },
-					{ name: 'accountId', type: 'uint128' },
-					{ name: 'sizeDelta', type: 'int128' },
-					{ name: 'settlementStrategyId', type: 'uint128' },
-					{ name: 'acceptablePrice', type: 'uint256' },
-					{ name: 'isReduceOnly', type: 'bool' },
-					{ name: 'trackingCode', type: 'bytes32' },
-					{ name: 'referrer', type: 'address' },
-				],
-				ConditionalOrder: [
-					{ name: 'orderDetails', type: 'OrderDetails' },
-					{ name: 'signer', type: 'address' },
-					{ name: 'nonce', type: 'uint256' },
-					{ name: 'requireVerified', type: 'bool' },
-					{ name: 'trustedExecutor', type: 'address' },
-					{ name: 'maxExecutorFee', type: 'uint256' },
-					{ name: 'conditions', type: 'bytes[]' },
-				],
+			OrderDetails: [
+				{ name: 'marketId', type: 'uint128' },
+				{ name: 'accountId', type: 'uint128' },
+				{ name: 'sizeDelta', type: 'int128' },
+				{ name: 'settlementStrategyId', type: 'uint128' },
+				{ name: 'acceptablePrice', type: 'uint256' },
+				{ name: 'isReduceOnly', type: 'bool' },
+				{ name: 'trackingCode', type: 'bytes32' },
+				{ name: 'referrer', type: 'address' },
+			],
+			ConditionalOrder: [
+				{ name: 'orderDetails', type: 'OrderDetails' },
+				{ name: 'signer', type: 'address' },
+				{ name: 'nonce', type: 'uint256' },
+				{ name: 'requireVerified', type: 'bool' },
+				{ name: 'trustedExecutor', type: 'address' },
+				{ name: 'maxExecutorFee', type: 'uint256' },
+				{ name: 'conditions', type: 'bytes[]' },
+			],
 		},
 		primaryType: "ConditionalOrder",
 		message: {
@@ -241,31 +266,31 @@ async function generateSignatureTypedData(
 	};
 
 	const signed = await wallet.signTypedData({
-			name: 'SMv3: OrderBook',
-			version: '1',
-			chainId: '84531',
-			verifyingContract: '0x13eBcd3aD7B4Aa0595Fe57085C62c4f9CaDdB000',
-		},
+		name: 'SMv3: OrderBook',
+		version: '1',
+		chainId: '84531',
+		verifyingContract: '0x13eBcd3aD7B4Aa0595Fe57085C62c4f9CaDdB000',
+	},
 		{
-				OrderDetails: [
-					{ name: 'marketId', type: 'uint128' },
-					{ name: 'accountId', type: 'uint128' },
-					{ name: 'sizeDelta', type: 'int128' },
-					{ name: 'settlementStrategyId', type: 'uint128' },
-					{ name: 'acceptablePrice', type: 'uint256' },
-					{ name: 'isReduceOnly', type: 'bool' },
-					{ name: 'trackingCode', type: 'bytes32' },
-					{ name: 'referrer', type: 'address' },
-				],
-				ConditionalOrder: [
-					{ name: 'orderDetails', type: 'OrderDetails' },
-					{ name: 'signer', type: 'address' },
-					{ name: 'nonce', type: 'uint256' },
-					{ name: 'requireVerified', type: 'bool' },
-					{ name: 'trustedExecutor', type: 'address' },
-					{ name: 'maxExecutorFee', type: 'uint256' },
-					{ name: 'conditions', type: 'bytes[]' },
-				],
+			OrderDetails: [
+				{ name: 'marketId', type: 'uint128' },
+				{ name: 'accountId', type: 'uint128' },
+				{ name: 'sizeDelta', type: 'int128' },
+				{ name: 'settlementStrategyId', type: 'uint128' },
+				{ name: 'acceptablePrice', type: 'uint256' },
+				{ name: 'isReduceOnly', type: 'bool' },
+				{ name: 'trackingCode', type: 'bytes32' },
+				{ name: 'referrer', type: 'address' },
+			],
+			ConditionalOrder: [
+				{ name: 'orderDetails', type: 'OrderDetails' },
+				{ name: 'signer', type: 'address' },
+				{ name: 'nonce', type: 'uint256' },
+				{ name: 'requireVerified', type: 'bool' },
+				{ name: 'trustedExecutor', type: 'address' },
+				{ name: 'maxExecutorFee', type: 'uint256' },
+				{ name: 'conditions', type: 'bytes[]' },
+			],
 		},
 		conditionalOrder
 	)
@@ -407,6 +432,120 @@ async function generateSignature(
 	const signature = signingKey.sign(messageHash).serialized;
 
 	return signature;
+}
+
+async function generateSignatureViem(
+	pk, // private key,
+	domainSeparator, // can get this from the engine contract (i.e. engine.DOMAIN_SEPARATOR())
+	marketId,
+	accountId,
+	sizeDelta,
+	settlementStrategyId,
+	acceptablePrice,
+	isReduceOnly,
+	trackingCode,
+	referrer,
+	nonce,
+	requireVerified,
+	trustedExecutor,
+	maxExecutorFee,
+	conditions
+) {
+	const account = privateKeyToAccount(pk)
+	const signer = account.address
+	console.log(signer)
+
+	const ORDER_DETAILS_TYPEHASH = viem.keccak256(
+		viem.toHex(
+			'OrderDetails(uint128 marketId,uint128 accountId,int128 sizeDelta,uint128 settlementStrategyId,uint256 acceptablePrice,bool isReduceOnly,bytes32 trackingCode,address referrer)'
+		)
+	)
+
+	const CONDITIONAL_ORDER_TYPEHASH = viem.keccak256(
+		viem.toHex(
+			'ConditionalOrder(OrderDetails orderDetails,address signer,uint256 nonce,bool requireVerified,address trustedExecutor,uint256 maxExecutorFee,bytes[] conditions)OrderDetails(uint128 marketId,uint128 accountId,int128 sizeDelta,uint128 settlementStrategyId,uint256 acceptablePrice,bool isReduceOnly,bytes32 trackingCode,address referrer)'
+		)
+	)
+
+	// define the order details struct
+	let orderDetails = {
+		marketId: marketId,
+		accountId: accountId,
+		sizeDelta: sizeDelta,
+		settlementStrategyId: settlementStrategyId,
+		acceptablePrice: acceptablePrice,
+		isReduceOnly: isReduceOnly,
+		trackingCode: trackingCode,
+		referrer: referrer,
+	};
+
+	// define the conditional order struct
+	let conditionalOrder = {
+		orderDetails: orderDetails,
+		signer: signer,
+		nonce: nonce,
+		requireVerified: requireVerified,
+		trustedExecutor: trustedExecutor,
+		maxExecutorFee: maxExecutorFee,
+		conditions: conditions,
+	};
+
+	// hash of the ABI-encoded parameters
+	let orderDetailsHash = viem.keccak256(viem.encodeAbiParameters(
+		viem.parseAbiParameters(
+			'bytes32, uint128, uint128, int128, uint128, uint256, bool, bytes32, address'
+		),
+		[
+			ORDER_DETAILS_TYPEHASH,
+			orderDetails.marketId,
+			orderDetails.accountId,
+			orderDetails.sizeDelta,
+			orderDetails.settlementStrategyId,
+			orderDetails.acceptablePrice,
+			orderDetails.isReduceOnly,
+			orderDetails.trackingCode,
+			orderDetails.referrer,
+		]
+	));
+
+	// hash of the ABI-encoded parameters
+	const conditionalOrderHash = viem.keccak256(
+		viem.encodeAbiParameters(
+			// ['bytes32', 'bytes32', 'address', 'uint256', 'bool', 'address', 'uint256', 'bytes32[]'],
+			viem.parseAbiParameters(
+				'bytes32, bytes32, address, uint256, bool, address, uint256, bytes32[]'
+			),
+			[
+				CONDITIONAL_ORDER_TYPEHASH,
+				orderDetailsHash,
+				conditionalOrder.signer,
+				conditionalOrder.nonce,
+				conditionalOrder.requireVerified,
+				conditionalOrder.trustedExecutor,
+				conditionalOrder.maxExecutorFee,
+				conditionalOrder.conditions.map((condition) =>
+					viem.keccak256(condition)
+				),
+			]
+		)
+	);
+
+	// To simulate `abi.encodePacked`, concatenate the encoded elements
+	// For a simple packed encoding, you can just concatenate the strings directly
+	// Since we're dealing with hex strings, ensure they are properly formatted without the '0x' prefix when concatenating
+	const packedData = viem.keccak256(
+		viem.encodePacked(
+			['string', 'bytes32', 'bytes32'],
+			['\x19\x01', domainSeparator, conditionalOrderHash]
+		)
+	);
+
+	// Sign the hash
+	const signature = await sign({ hash: packedData, privateKey: pk });
+
+	const serialized = viem.signatureToHex(signature)
+
+	return serialized;
 }
 
 // We recommend this pattern to be able to use async/await everywhere
